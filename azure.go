@@ -380,7 +380,14 @@ func (ac *AzureClient) getMetricNamespaceCollectionResponse(resource string) (*M
 
 // Returns resource list resolved and filtered from resource_groups configuration
 func (ac *AzureClient) filteredListFromResourceGroup(resourceGroup config.ResourceGroup) ([]AzureResource, error) {
-	resources, err := ac.listFromResourceGroup(resourceGroup.ResourceGroup, resourceGroup.ResourceTypes)
+	var resources []AzureResource
+	var err error
+
+	if resourceGroup.ResourceGroup == "*" {
+		resources, err = ac.listFromAllResourceGroups(resourceGroup.ResourceTypes)
+	} else {
+		resources, err = ac.listFromResourceGroup(resourceGroup.ResourceGroup, resourceGroup.ResourceTypes)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -409,6 +416,32 @@ func (ac *AzureClient) listFromResourceGroup(resourceGroup string, resourceTypes
 	filterTypes := url.QueryEscape(strings.Join(filterTypesElements, " or "))
 	subscription := fmt.Sprintf("subscriptions/%s", sc.C.Credentials.SubscriptionID)
 	resourcesEndpoint := fmt.Sprintf("%s/%s/resourceGroups/%s/resources?api-version=%s&$filter=%s", sc.C.ResourceManagerURL, subscription, resourceGroup, apiVersion, filterTypes)
+
+	body, err := getAzureMonitorResponse(resourcesEndpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	var data AzureResourceListResponse
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		return nil, fmt.Errorf("Error unmarshalling response body: %v", err)
+	}
+	return data.extendResources(), nil
+}
+
+// Returns all resources from all resource groups for given resource types
+// Sample request URL: https://management.azure.com/subscriptions/5657e1c7-4d9e-49f6-8e61-741922b174e5/resources?api-version=2021-04-01&%24filter=resourcetype%20eq%20'Microsoft.DBforPostgreSQL%2FflexibleServers'
+func (ac *AzureClient) listFromAllResourceGroups(resourceTypes []string) ([]AzureResource, error) {
+	apiVersion := "2021-04-01"
+
+	var filterTypesElements []string
+	for _, filterType := range resourceTypes {
+		filterTypesElements = append(filterTypesElements, fmt.Sprintf("resourcetype eq '%s'", filterType))
+	}
+	filterTypes := url.QueryEscape(strings.Join(filterTypesElements, " or "))
+	subscription := fmt.Sprintf("subscriptions/%s", sc.C.Credentials.SubscriptionID)
+	resourcesEndpoint := fmt.Sprintf("%s/%s/resources?api-version=%s&$filter=%s", sc.C.ResourceManagerURL, subscription, apiVersion, filterTypes)
 
 	body, err := getAzureMonitorResponse(resourcesEndpoint)
 	if err != nil {

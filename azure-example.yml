@@ -22,7 +22,7 @@ targets:
     - name: 'Process\Thread Count'
 
 resource_groups:
-  - resource_group: "webapps"
+  - resource_group: "webapps" # Supports also wildcard "*"
     resource_types:
       - "Microsoft.Compute/virtualMachines"
     resource_name_include_re:
