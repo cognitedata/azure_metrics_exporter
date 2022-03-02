@@ -24,6 +24,7 @@ var (
 	}
 	ac                    = NewAzureClient()
 	configFile            = kingpin.Flag("config.file", "Azure exporter configuration file.").Default("azure.yml").String()
+	configCredentialsFile = kingpin.Flag("config.credentials-file", "A JSON file overriding credentials from config.file if specified.").String()
 	listenAddress         = kingpin.Flag("web.listen-address", "The address to listen on for HTTP requests.").Default(":9276").String()
 	listMetricDefinitions = kingpin.Flag("list.definitions", "List available metric definitions for the given resources and exit.").Bool()
 	listMetricNamespaces  = kingpin.Flag("list.namespaces", "List available metric namespaces for the given resources and exit.").Bool()
@@ -316,6 +317,11 @@ func main() {
 	kingpin.Parse()
 	if err := sc.ReloadConfig(*configFile); err != nil {
 		log.Fatalf("Error loading config: %v", err)
+	}
+	if *configCredentialsFile != "" {
+		if err := sc.LoadCredentialsFromFile(*configCredentialsFile); err != nil {
+			log.Fatalf("Error credentials from file %s: %v", *configCredentialsFile, err)
+		}
 	}
 
 	err := ac.getAccessToken()

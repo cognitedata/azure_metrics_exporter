@@ -1,8 +1,10 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"regexp"
 	"strings"
 	"sync"
@@ -29,6 +31,13 @@ type SafeConfig struct {
 	C *Config
 }
 
+type CredentialsFile struct {
+	SubscriptionID string `json:"subscription_id"`
+	ClientID       string `json:"client_id"`
+	ClientSecret   string `json:"client_secret"`
+	TenantID       string `json:"tenant_id"`
+}
+
 // ReloadConfig - allows for live reloads of the configuration file.
 func (sc *SafeConfig) ReloadConfig(confFile string) (err error) {
 	var c = &Config{
@@ -51,6 +60,33 @@ func (sc *SafeConfig) ReloadConfig(confFile string) (err error) {
 
 	sc.Lock()
 	sc.C = c
+	sc.Unlock()
+
+	return nil
+}
+
+// ReloadConfig - allows for live reloads of the configuration file.
+func (sc *SafeConfig) LoadCredentialsFromFile(secretsFile string) (err error) {
+
+	jsonFileBytes, err := ioutil.ReadFile(secretsFile)
+	if err != nil {
+		return fmt.Errorf("Error reading secrets file: %s", err)
+	}
+	var c CredentialsFile
+	if err := json.Unmarshal(jsonFileBytes, &c); err != nil {
+		return fmt.Errorf("Error parsing config file: %s", err)
+	}
+
+	if c.ClientID == "" || c.ClientSecret == "" || c.SubscriptionID == "" || c.TenantID == "" {
+		return fmt.Errorf("Error validating credentials file, required fields: subscription_id, client_id, client_secret, tenant_id")
+	}
+
+	log.Println("Overriding credentials from config file with credentials from credentials file: " + secretsFile)
+	sc.Lock()
+	sc.C.Credentials.ClientID = c.ClientID
+	sc.C.Credentials.ClientSecret = c.ClientSecret
+	sc.C.Credentials.SubscriptionID = c.SubscriptionID
+	sc.C.Credentials.TenantID = c.TenantID
 	sc.Unlock()
 
 	return nil
