@@ -1,9 +1,9 @@
 FROM golang:1.17 as builder
 WORKDIR /go/src/github.com/RobustPerception/azure_metrics_exporter
 COPY . .
-RUN make build
+RUN CGO_ENABLED=0 go build
 
-FROM quay.io/prometheus/busybox:latest AS app
+FROM alpine:latest AS app
 
 COPY --from=builder /go/src/github.com/RobustPerception/azure_metrics_exporter/azure_metrics_exporter /bin/azure_metrics_exporter
 
