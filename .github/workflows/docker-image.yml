@@ -13,4 +13,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: make build
+      run: docker build -t ${{ github.repository }}/${{ github.ref_name }} .
