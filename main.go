@@ -23,11 +23,11 @@ var (
 		C: &config.Config{},
 	}
 	ac                    = NewAzureClient()
-	configFile            = kingpin.Flag("config.file", "Azure exporter configuration file.").Default("azure.yml").String()
-	configCredentialsFile = kingpin.Flag("config.credentials-file", "A JSON file overriding credentials from config.file if specified.").String()
-	listenAddress         = kingpin.Flag("web.listen-address", "The address to listen on for HTTP requests.").Default(":9276").String()
-	listMetricDefinitions = kingpin.Flag("list.definitions", "List available metric definitions for the given resources and exit.").Bool()
-	listMetricNamespaces  = kingpin.Flag("list.namespaces", "List available metric namespaces for the given resources and exit.").Bool()
+	configFile            = kingpin.Flag("config.file", "Azure exporter configuration file.").Default("azure.yml").Envar("CONFIG_FILE").String()
+	configCredentialsFile = kingpin.Flag("config.credentials-file", "A JSON file overriding credentials from config.file if specified.").Envar("CREDENTIALS_FILE").String()
+	listenAddress         = kingpin.Flag("web.listen-address", "The address to listen on for HTTP requests.").Default(":9276").Envar("LISTEN_ADDRESS").String()
+	listMetricDefinitions = kingpin.Flag("list.definitions", "List available metric definitions for the given resources and exit.").Envar("LIST_DEFINITIONS").Bool()
+	listMetricNamespaces  = kingpin.Flag("list.namespaces", "List available metric namespaces for the given resources and exit.").Envar("LIST_NAMESPACES").Bool()
 	invalidMetricChars    = regexp.MustCompile("[^a-zA-Z0-9_:]")
 	azureErrorDesc        = prometheus.NewDesc("azure_error", "Error collecting metrics", nil, nil)
 	batchSize             = 20
