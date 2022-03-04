@@ -12,5 +12,16 @@ resource_groups:
     resource_types:
       - "Microsoft.DBforPostgreSQL/flexibleServers"
       - "Microsoft.DBforPostgreSQL/servers"
+# Collecting currently only metrics that exists both on Single Server and Flexible Server
+# Could also create separate resource_group, but graphing would get ugly anyways
+# https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-monitoring
     metrics:
       - name: "cpu_percent"
+      - name: "memory_percent"
+      - name: "storage_used"
+      - name: "storage_percent"
+      - name: "backup_storage_used"
+      - name: "network_bytes_egress"
+      - name: "network_bytes_ingress"
+      - name: "connections_failed"
+      - name: "active_connections"
