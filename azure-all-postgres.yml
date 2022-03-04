@@ -1,0 +1,27 @@
+---
+active_directory_authority_url: "https://login.microsoftonline.com/"
+resource_manager_url: "https://management.azure.com/"
+credentials:
+  subscription_id: <override-via-creds-file>
+  client_id: <override-via-creds-file>
+  client_secret: <override-via-creds-file>
+  tenant_id: <override-via-creds-file>
+
+resource_groups:
+  - resource_group: "*"
+    resource_types:
+      - "Microsoft.DBforPostgreSQL/flexibleServers"
+      - "Microsoft.DBforPostgreSQL/servers"
+# Collecting currently only metrics that exists both on Single Server and Flexible Server
+# Could also create separate resource_group, but graphing would get ugly anyways
+# https://docs.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-monitoring
+    metrics:
+      - name: "cpu_percent"
+      - name: "memory_percent"
+      - name: "storage_used"
+      - name: "storage_percent"
+      - name: "backup_storage_used"
+      - name: "network_bytes_egress"
+      - name: "network_bytes_ingress"
+      - name: "connections_failed"
+      - name: "active_connections"
