@@ -1,0 +1,16 @@
+---
+active_directory_authority_url: "https://login.microsoftonline.com/"
+resource_manager_url: "https://management.azure.com/"
+credentials:
+  subscription_id: <override-via-creds-file>
+  client_id: <override-via-creds-file>
+  client_secret: <override-via-creds-file>
+  tenant_id: <override-via-creds-file>
+
+resource_groups:
+  - resource_group: "*"
+    resource_types:
+      - "Microsoft.DBforPostgreSQL/flexibleServers"
+      - "Microsoft.DBforPostgreSQL/servers"
+    metrics:
+      - name: "cpu_percent"
