@@ -25,3 +25,5 @@ resource_groups:
       - name: "network_bytes_ingress"
       - name: "connections_failed"
       - name: "active_connections"
+    aggregations:
+    - Average
